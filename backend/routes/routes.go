@@ -6,14 +6,10 @@ import (
     "backend/controllers"
 )
 
-func SetupRouter(db *gorm.DB) *gin.Engine {
-    r := gin.Default()
-
-    r.POST("/article/", controllers.CreatePost(db)) // Create new article
-    r.GET("/articles/:limit/:offset", controllers.GetPosts(db)) // Get articles with pagination
-    r.GET("/article/:id", controllers.GetPostById(db)) // Get article by ID
-    r.PUT("/article/:id", controllers.UpdatePost(db)) // Update article by ID
-    r.DELETE("/article/:id", controllers.DeletePost(db)) // Delete article by ID
-
-    return r
+func SetupRouter(db *gorm.DB, r *gin.Engine) {
+    r.POST("/article/", controllers.CreatePost(db))
+    r.GET("/articles/:limit/:offset", controllers.GetPosts(db))
+    r.GET("/article/:id", controllers.GetPostById(db))
+    r.PUT("/article/:id", controllers.UpdatePost(db))
+    r.POST("/article/:id/trash", controllers.MoveToTrash(db))
 }

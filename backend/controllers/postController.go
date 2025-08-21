@@ -81,14 +81,22 @@ func UpdatePost(db *gorm.DB) gin.HandlerFunc {
     }
 }
 
-// Delete post
-func DeletePost(db *gorm.DB) gin.HandlerFunc {
+// Soft delete / move to trash
+func MoveToTrash(db *gorm.DB) gin.HandlerFunc {
     return func(c *gin.Context) {
         id := c.Param("id")
-        if err := db.Delete(&models.Post{}, id).Error; err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete"})
+        var post models.Post
+        if err := db.First(&post, id).Error; err != nil {
+            c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
             return
         }
-        c.JSON(http.StatusOK, gin.H{"message": "deleted"})
+
+        post.Status = "thrash"
+        if err := db.Save(&post).Error; err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to move to trash"})
+            return
+        }
+
+        c.JSON(http.StatusOK, gin.H{"message": "moved to trash"})
     }
 }
